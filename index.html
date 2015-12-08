@@ -1,0 +1,51 @@
+
+<html>
+<head>
+
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+</head>
+<body>
+	<div class="container">
+		<div class="col-md-6 col-md-offset-2">
+
+      <ul class="list-group" data-bind="foreach: tasks">
+        <li class="list-group-item" data-bind="text: name , click: $parent.loadModal"></li>
+      </ul>
+		</div>
+	</div>
+    <div class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="col-md-4">
+                <table class="table">
+                <tbody id="task" data-bind="foreach: task">
+                    <tr>
+                        <td>  
+                            <label data-bind="text: key +':     '"></label>
+                        </td>
+                        <td>
+                            <input type="text" data-bind="value: value">
+                        </td>
+                    </tr>
+                </tbody>
+                </table>
+                <button type="button" class="btn btn-default btn-lg">
+                  <span class="glyphicon glyphicon-plus" aria-hidden="true" onclick="addModalLine()"></span>
+                </button>
+           </div>
+        </div>
+      </div>
+    </div>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
+  <script type="text/javascript" src="/js/helper.js"></script>
+
+  <script type="text/javascript" src="/js/ko.js"></script>
+</body>
