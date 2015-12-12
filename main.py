@@ -61,7 +61,7 @@ def make_app():
         (r"/ocupacion.1.html", ocupacion),
         (r"/tasks.json", tasksJson),
          (r'/js/(.*)', tornado.web.StaticFileHandler, {'path': './js'})
-    ])
+    ], debug=True)
 
 if __name__ == "__main__":
     app = make_app()
