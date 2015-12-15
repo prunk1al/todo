@@ -11,7 +11,7 @@ var Task=function(data){
         for (var key in self.data) {
             if (data.hasOwnProperty(key) ) {
                 if (key!='_id'){
-                    self.properties.push({ key: key, value: ko.observable(data[key]), editing:ko.observable(0) });
+                    self.properties.push({ key: key, value: data[key], editing:ko.observable(0) });
                 };
                 self[key]=ko.observable(data[key]);
             }
@@ -40,7 +40,7 @@ var Task=function(data){
     this.initProperties();
     
     this.editProperty=function(prop){
-        $('#'+prop.key+'input').replaceWith('<input type="text" data-bind="value: value" id='+prop.key+'input >')
+        $('#'+prop.key+'input').replaceWith('<input type="text" data-bind="text: value" id='+prop.key+'input value='+prop.value+'>')
         prop.editing(true)
     }
     
@@ -52,17 +52,14 @@ var Task=function(data){
     this.updateProperty=function(key){
         console.log("sending to mongo");
         console.log(key)
-        console.log(self)
         var data={'_id':self._id()};
         data[key]=self[key]
         
         $.post('/update',JSON.stringify(data),function(res){
             console.log('Updated in mongo');
         })
-        console.log(self[key])
-        //self.data[key](self[key])
+        self.data[key]=self[key]
         console.log(ko.toJS(self))
-        console.log(self)
     }
     
     
@@ -83,9 +80,9 @@ var ViewModel=function() {
     	var a =[];
     	for(var i in dta){
             var t =  new Task(dta[i]);
-            self.tasks.push(t);
+            a.push(t);
         }
-        //self.tasks(a);
+        self.tasks(a);
         console.log(self.tasks());
       });
     };
@@ -93,9 +90,9 @@ var ViewModel=function() {
     this.loadModal=function(task){
         $("#task").empty();
         console.log(task)
-        self.modalTask(task);
+        self.myModal(task);
         $('#myModal').modal("show");
-    };
+    
     this.saveTask=function(task){
         $("#task").empty();
         $('#myModal').modal("show")
