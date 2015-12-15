@@ -40,35 +40,32 @@ var Task=function(data){
     this.initProperties();
     
     this.editProperty=function(prop){
-        $('#'+prop.key+'input').replaceWith('<input type="text" data-bind="value: value" id='+prop.key+'input >')
+        //$('#'+prop.key+'input').replaceWith('<input type="text" data-bind="value: value" id='+prop.key+'input >')
         prop.editing(true)
     }
     
     this.saveProperty=function(prop){
-        self[prop.key]=$('#'+prop.key+'input').val()
+        self[prop.key](prop.value())
         self.updateProperty(prop.key)
+        prop.editing(false)
+
     }
     
     this.updateProperty=function(key){
         console.log("sending to mongo");
         console.log(key)
-        console.log(self)
         var data={'_id':self._id()};
-        data[key]=self[key]
-        
+        data[key]=self[key]()
+        console.log(data)
         $.post('/update',JSON.stringify(data),function(res){
             console.log('Updated in mongo');
         })
-        console.log(self[key])
-        //self.data[key](self[key])
-        console.log(ko.toJS(self))
-        console.log(self)
+        
     }
     
     
         
 }
-
 
 var ViewModel=function() {
     var self=this;

@@ -32,7 +32,8 @@
                                             <label data-bind="text: key + ': ', attr:{id:key+'label'}"></label>
                                         </td>
                                         <td>
-                                            <label  data-bind="text: value, attr:{id:key+'input'}">
+                                            <label  data-bind="text: value, visible:!editing()"></label>
+                                            <input type="text" data-bind="value: value, visible:editing">
                                         </td>
                                         <td>
                                         <button type="button" class="btn btn-default" data-bind='click:$parent.editProperty, visible:!editing()'>

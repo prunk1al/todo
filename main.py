@@ -15,7 +15,6 @@ class MainHandler(tornado.web.RequestHandler):
 class tasksJson(tornado.web.RequestHandler):
     def get(self):
         data=[]
-       
         datas=collection.find()
         for d in datas:
             d['_id']=str(d['_id'])
@@ -27,6 +26,7 @@ class Update(tornado.web.RequestHandler):
         data=json.loads(self.request.body)
         filter={'_id':ObjectId(data['_id'])}
         del data['_id']
+        print data
         task=collection.update_one(filter,{'$set':data} )
         print task
 
