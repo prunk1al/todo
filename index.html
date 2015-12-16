@@ -9,6 +9,8 @@
 
     <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+      <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
 
 </head>
 <body>
@@ -21,14 +23,14 @@
 		</div>
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog">
-                <div class="modal-content">
+                <div class="modal-content" data-bind="with: modalTask">
                    
                     <div class="modal-body" id="modalBody" >
-                            <table class="table" data-bind="with: modalTask">
-                                <tbody id="task" data-bind="foreach: properties">
+                            <table class="table" >
+                                <tbody id="task" data-bind="foreach: properties, sortable:properties" class="sortable-ui">
  
-                                    <tr>
-                                        <td>  
+                                    <tr data-bind=" attr:{id:key}">
+                                        <td >  
                                             <label data-bind="text: key + ': ', attr:{id:key+'label'}"></label>
                                         </td>
                                         <td>
@@ -43,6 +45,9 @@
                                         <button type="button" class="btn btn-default" data-bind='click:$parent.saveProperty, visible:editing'>
                                             <span class="glyphicon glyphicon-save" aria-hidden="false"></span>
                                         </button>
+                                        <button type="button" class="btn btn-default" data-bind='click:$parent.dropProperty'>
+                                            <span class="glyphicon glyphicon-minus" aria-hidden="false"></span>
+                                        </button>
                                         </td>
                                     </tr>
                                     
@@ -50,7 +55,7 @@
                             </table>
                         
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" onclick="addModalLine()">
+                            <button type="button" class="btn btn-default" data-bind="click:newProperty">
                               <span class="glyphicon glyphicon-plus" aria-hidden="false"></span>
                             </button>
 

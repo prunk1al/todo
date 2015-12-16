@@ -4,7 +4,7 @@ var Task=function(data){
     self.data=data
     this.name=ko.observable(data.name);
     this.properties=ko.observableArray([]);
-    
+
     
     
     this.initProperties=function(){
@@ -63,7 +63,31 @@ var Task=function(data){
         
     }
     
+    this.newProperty=function(key){
+        $("#task").append("<tr id='newProp'><td><input id='newKey' data-bind='value: newkey' type='text'></td><td><input id='newValue' data-bind='value: newvalue' type='text'></td> <td><button type='button' id='newButton' class='btn btn-default' data-bind='click:saveNewProperty'><span class='glyphicon glyphicon-save' aria-hidden='false'></span></button></td></tr>");
+        self.newkey=ko.observable()
+        self.newvalue=ko.observable()
+        ko.applyBindings(self,$("#newKey")[0])
+        ko.applyBindings(self,$("#newValue")[0])
+        ko.applyBindings(self,$("#newButton")[0])
+    }
     
+    this.saveNewProperty=function(){
+        self[self.newkey()](self.newvalue());
+        self.updateProperty(self.newkey());
+        
+    }
+    
+    this.dropProperty=function(data){
+        $('#'+data.key).remove();
+        self[data.key]('');
+        data._id=self._id();
+        delete self[data.key]
+        console.log(data)
+        $.post('/drop',JSON.stringify(data),function(res){
+            console.log('Updated in mongo');
+        })
+    }
         
 }
 
@@ -109,6 +133,49 @@ var ViewModel=function() {
 }
 
 
+ko.bindingHandlers.sortable = {
+    init: function (element, valueAccessor) {
+        // cached vars for sorting events
+        var startIndex = -1,
+            koArray = valueAccessor();
+        
+        var sortableSetup = {
+            // cache the item index when the dragging starts
+            start: function (event, ui) {
+                startIndex = ui.item.index();
+                
+                // set the height of the placeholder when sorting
+                ui.placeholder.height(ui.item.height());
+            },
+            // capture the item index at end of the dragging
+            // then move the item
+            stop: function (event, ui) {
+                
+                // get the new location item index
+                var newIndex = ui.item.index();
+                
+                if (startIndex > -1) {
+                    //  get the item to be moved
+                    var item = koArray()[startIndex];
+                     
+                    //  remove the item
+                    koArray.remove(item);
+                    
+                    //  insert the item back in to the list
+                    koArray.splice(newIndex, 0, item);
+
+                    //  ko rebinds the array so remove duplicate ui item
+                    ui.item.remove();
+                }
+
+            },
+            placeholder: 'fruitMoving'
+        };
+        
+        // bind
+        $(element).sortable( sortableSetup );  
+    }
+};
 
 
 ko.applyBindings(new ViewModel());

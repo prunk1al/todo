@@ -30,12 +30,23 @@ class Update(tornado.web.RequestHandler):
         task=collection.update_one(filter,{'$set':data} )
         print task
 
+class Drop(tornado.web.RequestHandler):
+    def post(self):
+        data=json.loads(self.request.body)
+        filter={'_id':ObjectId(data['_id'])}
+        del data['_id']
+        print data
+        task=collection.update_one(filter,{'$unset':{data['key']:''}} )
+        task=collection.find(filter)
+        for t in task:
+            print t
 
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/tasks.json", tasksJson),
         (r"/update", Update),
+        (r"/drop", Drop),
          (r'/js/(.*)', tornado.web.StaticFileHandler, {'path': './js'})
     ], debug=True)
 
