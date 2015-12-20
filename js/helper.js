@@ -1,3 +1,7 @@
-function addModalLine(){
-    $("#task").append("<tr><td><input type='text'></td><td><input type='text'></td></tr>");
-}
+ function compare(a,b) {
+      if (parseInt(a.relevancia()) < parseInt(b.relevancia()))
+        return -1;
+      if (parseInt(a.relevancia()) > parseInt(b.relevancia()))
+        return 1;
+      return 0;
+    } 

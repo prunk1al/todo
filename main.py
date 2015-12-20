@@ -2,6 +2,7 @@ import tornado.ioloop
 import tornado.web
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from bson.code import Code
 import json
 
 client= MongoClient('localhost', 27017)
@@ -41,12 +42,20 @@ class Drop(tornado.web.RequestHandler):
         for t in task:
             print t
 
+class projectosJson(tornado.web.RequestHandler):
+    def get(self):
+        reducer=Code('function(doc, prev) { prev.sum += 1}')
+        data=collection.group(key = {'projecto': True}, condition={}, initial= {'sum': 0}, reduce= reducer)
+        self.write(json.dumps(data))
+
+
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/tasks.json", tasksJson),
         (r"/update", Update),
         (r"/drop", Drop),
+        (r"/projectos.json", projectosJson),
          (r'/js/(.*)', tornado.web.StaticFileHandler, {'path': './js'})
     ], debug=True)
 

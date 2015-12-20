@@ -14,20 +14,50 @@
 
 </head>
 <body>
+    <h1  class="text-center">Peticiones de Cambio</h1></br>
 	<div class="container">
-		<div class="col-md-6 col-md-offset-2">
-            <ul class="list-group" data-bind="foreach: tasks">
-                <li class="list-group-item" data-bind="text: name , click: $parent.loadModal"></li>
+		<div class="col-md-6 col-md-offset-3">
+            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                <a href="#" class="btn btn-default" role="button" data-bind='click: initTasks'>Peticiones</a>
+                <a href="#" class="btn btn-default" role="button" data-bind='click: initProjects' >Projectos</a>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            <span>Prioridad</span>
+                        </th>
+                        <th>
+                            <span>Nombre</span>
+                        </th>
+                        <th>
+                            <span>Projecto</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: tableRows">
+                    <tr data-bind="click: $parent.loadModal">
+                        <td>
+                            <span data-bind="text: relevancia , click: $parent.loadModal"></span>
+                        </td>
+                        <td>
+                            <span data-bind="text: name , click: $parent.loadModal"></span>
+                        </td>
+                        <td>
+                            <span data-bind="text: projecto , click: $parent.loadModal"></span>
+                        </td>
+                    </tr>
+                </tbody>
 
-            </ul>
+            </table>
 		</div>
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog">
                 <div class="modal-content" data-bind="with: modalTask">
-                   
+
                     <div class="modal-body" id="modalBody" >
                             <table class="table" >
-                                <tbody id="task" data-bind="foreach: properties, sortable:properties" class="sortable-ui">
+                                <tbody id="task" data-bind="foreach: properties" class="sortable-ui">
  
                                     <tr data-bind=" attr:{id:key}">
                                         <td >  
@@ -51,6 +81,22 @@
                                         </td>
                                     </tr>
                                     
+                                </tbody>
+                                <tbody>
+                                    <tr id='newProp' data-bind="visible: newVisible">
+                                        <td>
+                                            <input id='newKey' data-bind='value: newkey' type='text'>
+                                        </td>
+                                        <td>
+                                            <input id='newValue' data-bind='value: newvalue' type='text'>
+                                        </td> 
+                                        <td>
+                                            <button type='button' id='newButton' class='btn btn-default' data-bind='click:saveNewProperty'>
+                                                <span class='glyphicon glyphicon-save' aria-hidden='false'></span>
+                                            </button>
+                                        </td>
+                                    </tr>
+
                                 </tbody>
                             </table>
                         

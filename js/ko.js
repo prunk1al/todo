@@ -1,11 +1,16 @@
-var Task=function(data){
-    console.log(data)
+var Task=function(data, parent){
+    //console.log(data)
     var self=this;
+    self.Parent = ko.observable(parent)
+
     self.data=data
     this.name=ko.observable(data.name);
     this.properties=ko.observableArray([]);
 
-    
+    //bindings para nuevos campos
+    this.newkey=ko.observable()
+    this.newvalue=ko.observable()
+    this.newVisible=ko.observable(false)
     
     this.initProperties=function(){
         for (var key in self.data) {
@@ -16,31 +21,12 @@ var Task=function(data){
                 self[key]=ko.observable(data[key]);
             }
         }
+
     };
-    /*
-    this.loadModal=function(task){
-        $("#task").empty();
-        
-        var prop=self.properties();
-        for (var p in prop){
-        console.log(prop[p]);
-        var key=prop[p].key
-        var value=prop[p].value
-        $('#task').append('<tr><td><label >'+key+'</label></td><td><label>'+value+'</label></td><td>');
-        $('#task').append(' <button type="button" class="btn btn-default" data-bind="click:editProperty, visible:!editing()">');
-        $('#task').append('<span class="glyphicon glyphicon-pencil" aria-hidden="false"></span> </button>');
-                                        
-        $('#task').append('<button type="button" class="btn btn-default" data-bind="click:saveProperty, visible:editing">');
-        $('#task').append('<span class="glyphicon glyphicon-save" aria-hidden="false"></span></td></tr>');
-        }
-        $('#myModal').modal("show");        
-        
-    };
-    */
+    
     this.initProperties();
     
     this.editProperty=function(prop){
-        //$('#'+prop.key+'input').replaceWith('<input type="text" data-bind="value: value" id='+prop.key+'input >')
         prop.editing(true)
     }
     
@@ -61,20 +47,27 @@ var Task=function(data){
             console.log('Updated in mongo');
         })
         
+        if (key=='relevancia'){
+            console.log(parent)
+            parent.tasks.sort(compare)
+            console.log(parent.tasks())
+        }
     }
     
     this.newProperty=function(key){
-        $("#task").append("<tr id='newProp'><td><input id='newKey' data-bind='value: newkey' type='text'></td><td><input id='newValue' data-bind='value: newvalue' type='text'></td> <td><button type='button' id='newButton' class='btn btn-default' data-bind='click:saveNewProperty'><span class='glyphicon glyphicon-save' aria-hidden='false'></span></button></td></tr>");
-        self.newkey=ko.observable()
-        self.newvalue=ko.observable()
-        ko.applyBindings(self,$("#newKey")[0])
-        ko.applyBindings(self,$("#newValue")[0])
-        ko.applyBindings(self,$("#newButton")[0])
+        self.newVisible(true)
     }
     
     this.saveNewProperty=function(){
-        self[self.newkey()](self.newvalue());
+        self[self.newkey()]=ko.observable(self.newvalue());
+        self.properties.push({ key: self.newkey(), value: ko.observable(self.newvalue()) , editing:ko.observable(0) })
+
         self.updateProperty(self.newkey());
+
+        //reseteamos para poder introducir otros
+        self.newkey('');
+        self.newvalue('');
+        self.newVisible(false);
         
     }
     
@@ -84,36 +77,70 @@ var Task=function(data){
         data._id=self._id();
         delete self[data.key]
         console.log(data)
+        console.log(ko.toJS(self))
         $.post('/drop',JSON.stringify(data),function(res){
             console.log('Updated in mongo');
         })
     }
+
+
+
         
 }
 
+var Project=function (data) {
+    var self=this;
+    this.name=ko.observable(data.projecto)
+    this.projecto=ko.observable(parseInt(data.sum))
+    this.relevancia=ko.observable(parseInt(data.sum))
+}
+
+
 var ViewModel=function() {
     var self=this;
-    this.tasks=ko.observableArray();
+    this.tableRows=ko.observableArray();
     this.modalTask=ko.observable();
     
     this.initData=function(){
 
-    	var url="tasks.json";
-    	$.get( url, function( data ) {
-    	var dta=JSON.parse(data);
-    	var a =[];
-    	for(var i in dta){
-            var t =  new Task(dta[i]);
-            self.tasks.push(t);
-        }
-        //self.tasks(a);
-        console.log(self.tasks());
-      });
+    	this.initTasks();
     };
     
+   this.initTasks=function(){
+    var url="tasks.json";
+    self.tableRows([])
+        $.get( url, function( data ) {
+        var dta=JSON.parse(data);
+        var a =[];
+        for(var i in dta){
+            var t =  new Task(dta[i], self);
+            self.tableRows.push(t);
+            
+        }
+        self.tableRows.sort(compare);
+      });
+    }
+
+    this.initProjects=function(){
+    var url="projectos.json"
+    self.tableRows([])
+        $.get( url, function( data ) {
+        var dta=JSON.parse(data);
+        var a =[];
+        for(var i in dta){
+            var t =  new Project(dta[i], self);
+            console.log(t)
+            self.tableRows.push(t);
+            
+        }
+        self.tableRows.sort(compare);
+      });
+    }
+
+
     this.loadModal=function(task){
         $("#task").empty();
-        console.log(task)
+        console.log(ko.toJS(task))
         self.modalTask(task);
         $('#myModal').modal("show");
     };
