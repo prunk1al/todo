@@ -21,6 +21,9 @@
                 <a href="#" class="btn btn-default" role="button" data-bind='click: initTasks'>Peticiones</a>
                 <a href="#" class="btn btn-default" role="button" data-bind='click: initProjects' >Projectos</a>
             </div>
+            <div data-bind="template: { name: 'template1', 'if': one }"></div>
+            <div data-bind="template: { name: 'template2', ifnot: one }"></div>
+            <script id="template1" type="text/template">
             <table class="table">
                 <thead>
                     <tr>
@@ -50,6 +53,33 @@
                 </tbody>
 
             </table>
+            </script>
+            <script id="template2" type="text/template">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            <span>Projecto</span>
+                        </th>
+                        <th>
+                            <span>Nº de peticiones</span>
+                        </th>
+                        
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: tableRows">
+                    <tr data-bind="click: $parent.loadModal">
+                        <td>
+                            <span data-bind="text: name , click: $parent.loadModal"></span>
+                        </td>
+                        <td>
+                            <span data-bind="text: counts, click: $parent.loadModal"></span>
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+            </script>
 		</div>
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog">

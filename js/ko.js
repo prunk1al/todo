@@ -91,8 +91,7 @@ var Task=function(data, parent){
 var Project=function (data) {
     var self=this;
     this.name=ko.observable(data.projecto)
-    this.projecto=ko.observable(parseInt(data.sum))
-    this.relevancia=ko.observable(parseInt(data.sum))
+    this.counts=ko.observable(parseInt(data.sum))
 }
 
 
@@ -100,6 +99,7 @@ var ViewModel=function() {
     var self=this;
     this.tableRows=ko.observableArray();
     this.modalTask=ko.observable();
+    this.one=ko.observable()
     
     this.initData=function(){
 
@@ -107,8 +107,10 @@ var ViewModel=function() {
     };
     
    this.initTasks=function(){
+   
     var url="tasks.json";
     self.tableRows([])
+     this.one(true)
         $.get( url, function( data ) {
         var dta=JSON.parse(data);
         var a =[];
@@ -124,6 +126,8 @@ var ViewModel=function() {
     this.initProjects=function(){
     var url="projectos.json"
     self.tableRows([])
+    this.one(false);
+
         $.get( url, function( data ) {
         var dta=JSON.parse(data);
         var a =[];
