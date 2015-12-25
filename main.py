@@ -25,11 +25,17 @@ class tasksJson(tornado.web.RequestHandler):
 class Update(tornado.web.RequestHandler):
     def post(self):
         data=json.loads(self.request.body)
-        filter={'_id':ObjectId(data['_id'])}
-        del data['_id']
-        print data
-        task=collection.update_one(filter,{'$set':data} )
-        print task
+        if '_id' in data:
+            filter={'_id':ObjectId(data['_id'])}
+            del data['_id']
+            print data
+            task=collection.update_one(filter,{'$set':data} )
+            print task
+        else:
+            print data
+            task=collection.insert_one(data).inserted_id
+            self.write(json.dumps({'_id':str(task)}))
+
 
 class Drop(tornado.web.RequestHandler):
     def post(self):
