@@ -20,6 +20,9 @@
             <div class="btn-group btn-group-justified" role="group" aria-label="...">
                 <a href="#" class="btn btn-default" role="button" data-bind='click: initTasks'>Peticiones</a>
                 <a href="#" class="btn btn-default" role="button" data-bind='click: initProjects' >Projectos</a>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default " data-bind='click: newTask' >Nueva Peticion</button>
+                </div>
             </div>
             <div data-bind="template: { name: 'template1', 'if': one }"></div>
             <div data-bind="template: { name: 'template2', ifnot: one }"></div>
@@ -84,11 +87,13 @@
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog">
                 <div class="modal-content" data-bind="with: modalTask">
-
+                    <div class="modal-header" id="modalHead" >
+                        <h3 class="text-center"> Peticion de Cambio</h3>
+                    </div>
                     <div class="modal-body" id="modalBody" >
                             <table class="table" >
                                 <tbody id="task" data-bind="foreach: properties" class="sortable-ui">
- 
+                                    
                                     <tr data-bind=" attr:{id:key}">
                                         <td >  
                                             <label data-bind="text: key + ': ', attr:{id:key+'label'}"></label>
@@ -105,7 +110,7 @@
                                         <button type="button" class="btn btn-default" data-bind='click:$parent.saveProperty, visible:editing'>
                                             <span class="glyphicon glyphicon-save" aria-hidden="false"></span>
                                         </button>
-                                        <button type="button" class="btn btn-default" data-bind='click:$parent.dropProperty'>
+                                        <button type="button" class="btn btn-default" data-bind='click:$parent.dropProperty, visible:removable'>
                                             <span class="glyphicon glyphicon-minus" aria-hidden="false"></span>
                                         </button>
                                         </td>

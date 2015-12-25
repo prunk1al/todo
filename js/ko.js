@@ -1,11 +1,36 @@
+var Property=function(key, value){
+    this.needed=['name', 'projecto', 'relevancia']
+    this.p={ key: key, value: value , editing:ko.observable(0)}
+    if ( this.needed.indexOf(key)==-1){
+         this.p.removable=ko.observable(1);
+     }
+     else{
+        this.p.removable=ko.observable(0);
+     }
+
+     return this.p
+}
+
 var Task=function(data, parent){
     //console.log(data)
     var self=this;
     self.Parent = ko.observable(parent)
+    this.properties=ko.observableArray()
 
     self.data=data
-    this.name=ko.observable(data.name);
-    this.properties=ko.observableArray([]);
+    if ('_id' in data){
+        this.name=ko.observable(data.name);
+        this.projecto=ko.observable(data.projecto);
+        this.relevancia=ko.observable(data.relevancia);
+
+    }
+    else{
+        this.name=ko.observable('');
+        this.projecto=ko.observable('')
+        this.relevancia=ko.observable('')
+        this.properties=ko.observableArray([new Property('name',this.name),new Property('projecto',this.projecto),new Property('relevancia',this.relevancia)]);
+
+    }
 
     //bindings para nuevos campos
     this.newkey=ko.observable()
@@ -13,12 +38,14 @@ var Task=function(data, parent){
     this.newVisible=ko.observable(false)
     
     this.initProperties=function(){
-        for (var key in self.data) {
-            if (data.hasOwnProperty(key) ) {
-                if (key!='_id'){
-                    self.properties.push({ key: key, value: ko.observable(data[key]), editing:ko.observable(0) });
-                };
-                self[key]=ko.observable(data[key]);
+        if ('_id' in data){
+            for (var key in self.data) {
+                if (data.hasOwnProperty(key) ) {
+                    if (key!='_id'){
+                        self.properties.push( new Property(key, ko.observable(data[key])));
+                    };
+                    self[key]=ko.observable(data[key]);
+                }
             }
         }
 
@@ -31,15 +58,20 @@ var Task=function(data, parent){
     }
     
     this.saveProperty=function(prop){
-        self[prop.key](prop.value())
-        self.updateProperty(prop.key)
-        prop.editing(false)
+        self[prop.key](prop.value());
+        prop.editing(false);
+        
+        if ('_id' in self.data){
+            self.updateProperty(prop.key);   
+        }
+        else{
+            self.saveNewTask(prop.key);
+        }
 
     }
     
     this.updateProperty=function(key){
         console.log("sending to mongo");
-        console.log(key)
         var data={'_id':self._id()};
         data[key]=self[key]()
         console.log(data)
@@ -48,19 +80,29 @@ var Task=function(data, parent){
         })
         
         if (key=='relevancia'){
-            console.log(parent)
-            parent.tasks.sort(compare)
-            console.log(parent.tasks())
+            self.Parent().tableRows.sort(compare)
         }
+    }
+
+    this.saveNewTask=function(key){
+        data={}
+        data[key]=self[key]()
+        $.post('/update',JSON.stringify(data),function(res){
+            console.log('Added in mongo');
+            self._id=ko.observable(JSON.parse(res)['_id'])
+            self.data['_id']=JSON.parse(res)['_id']
+        })
+        self.Parent().tableRows.push(self);
+        self.Parent().tableRows.sort(compare)
     }
     
     this.newProperty=function(key){
-        self.newVisible(true)
+        self.newVisible(true);
     }
     
     this.saveNewProperty=function(){
         self[self.newkey()]=ko.observable(self.newvalue());
-        self.properties.push({ key: self.newkey(), value: ko.observable(self.newvalue()) , editing:ko.observable(0) })
+        self.properties.push( new Property(self.newkey(), ko.observable(self.newvalue())));
 
         self.updateProperty(self.newkey());
 
@@ -75,11 +117,9 @@ var Task=function(data, parent){
         $('#'+data.key).remove();
         self[data.key]('');
         data._id=self._id();
-        delete self[data.key]
-        console.log(data)
-        console.log(ko.toJS(self))
+        delete self[data.key];
         $.post('/drop',JSON.stringify(data),function(res){
-            console.log('Updated in mongo');
+            console.log('Dropped in mongo');
         })
     }
 
@@ -90,8 +130,8 @@ var Task=function(data, parent){
 
 var Project=function (data) {
     var self=this;
-    this.name=ko.observable(data.projecto)
-    this.counts=ko.observable(parseInt(data.sum))
+    this.name=ko.observable(data.projecto);
+    this.counts=ko.observable(parseInt(data.sum));
 }
 
 
@@ -141,12 +181,20 @@ var ViewModel=function() {
       });
     }
 
+    this.newTask=function(){
+        var task = new Task({}, self);
+        console.log((task))
+        self.loadModal(task)
+    }
 
     this.loadModal=function(task){
         $("#task").empty();
         console.log(ko.toJS(task))
         self.modalTask(task);
         $('#myModal').modal("show");
+        $("#myModal").draggable({
+            handle: ".modal-header"
+        });
     };
     this.saveTask=function(task){
         $("#task").empty();
@@ -160,53 +208,10 @@ var ViewModel=function() {
         self.task(properties);
     };
 
-    this.initData()
+    this.initData();
 }
 
 
-ko.bindingHandlers.sortable = {
-    init: function (element, valueAccessor) {
-        // cached vars for sorting events
-        var startIndex = -1,
-            koArray = valueAccessor();
-        
-        var sortableSetup = {
-            // cache the item index when the dragging starts
-            start: function (event, ui) {
-                startIndex = ui.item.index();
-                
-                // set the height of the placeholder when sorting
-                ui.placeholder.height(ui.item.height());
-            },
-            // capture the item index at end of the dragging
-            // then move the item
-            stop: function (event, ui) {
-                
-                // get the new location item index
-                var newIndex = ui.item.index();
-                
-                if (startIndex > -1) {
-                    //  get the item to be moved
-                    var item = koArray()[startIndex];
-                     
-                    //  remove the item
-                    koArray.remove(item);
-                    
-                    //  insert the item back in to the list
-                    koArray.splice(newIndex, 0, item);
-
-                    //  ko rebinds the array so remove duplicate ui item
-                    ui.item.remove();
-                }
-
-            },
-            placeholder: 'fruitMoving'
-        };
-        
-        // bind
-        $(element).sortable( sortableSetup );  
-    }
-};
 
 
 ko.applyBindings(new ViewModel());
