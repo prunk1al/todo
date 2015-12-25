@@ -1,7 +1,9 @@
+var needed=['name', 'projecto', 'relevancia'].reverse()
+
 var Property=function(key, value){
     this.needed=['name', 'projecto', 'relevancia']
     this.p={ key: key, value: value , editing:ko.observable(0)}
-    if ( this.needed.indexOf(key)==-1){
+    if ( needed.indexOf(key)==-1){
          this.p.removable=ko.observable(1);
      }
      else{
@@ -48,8 +50,36 @@ var Task=function(data, parent){
                 }
             }
         }
+        self.neededFirst()
+
 
     };
+    this.neededFirst=function(){
+        console.log("start")
+        var list=self.properties()
+        console.log(list)
+        //var n=needed.reverse()
+        needed.forEach(function(element){
+            indexes = $.map(list, function(obj, index) {
+                if(obj.key == element) {
+                    return index;
+                }
+            })
+            console.log(element, indexes)
+            var e=self.properties.splice(indexes,1)
+            self.properties.unshift(e[0])
+            console.log(self.properties())
+        })
+        
+       /* console.log(indexes)
+        console.log(self.properties());
+        console.log(self.properties().indexOf({'key':'name'}))
+        for (var key in self.properties()) {
+
+            console.log(self.properties()[key])
+        }
+*/
+    }
     
     this.initProperties();
     
