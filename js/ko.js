@@ -1,7 +1,6 @@
 var needed=['name', 'projecto', 'relevancia'].reverse()
 
 var Property=function(key, value){
-    this.needed=['name', 'projecto', 'relevancia']
     this.p={ key: key, value: value , editing:ko.observable(0)}
     if ( needed.indexOf(key)==-1){
          this.p.removable=ko.observable(1);
@@ -19,20 +18,31 @@ var Task=function(data, parent){
     self.Parent = ko.observable(parent)
     this.properties=ko.observableArray()
 
+    //this.finalizado=ko.observable()
+
+
+
     self.data=data
     if ('_id' in data){
         this.name=ko.observable(data.name);
         this.projecto=ko.observable(data.projecto);
         this.relevancia=ko.observable(data.relevancia);
-
+        this.isNew=ko.observable(false);
     }
     else{
         this.name=ko.observable('');
         this.projecto=ko.observable('')
         this.relevancia=ko.observable('')
         this.properties=ko.observableArray([new Property('name',this.name),new Property('projecto',this.projecto),new Property('relevancia',this.relevancia)]);
-
+        this.finalizado=ko.observable(false);
+        this.properties.push(new Property('finalizado',this.finalizado))
+        this.isNew=ko.observable(true);
+        this.properties().forEach(function(e){
+            e.editing(1)
+        })
     }
+
+    
 
     //bindings para nuevos campos
     this.newkey=ko.observable()
@@ -54,31 +64,18 @@ var Task=function(data, parent){
 
 
     };
-    this.neededFirst=function(){
-        console.log("start")
+
+    this.neededFirst=function(){ //ordenamos los campos obligatorios
         var list=self.properties()
-        console.log(list)
-        //var n=needed.reverse()
         needed.forEach(function(element){
             indexes = $.map(list, function(obj, index) {
                 if(obj.key == element) {
                     return index;
                 }
             })
-            console.log(element, indexes)
             var e=self.properties.splice(indexes,1)
             self.properties.unshift(e[0])
-            console.log(self.properties())
-        })
-        
-       /* console.log(indexes)
-        console.log(self.properties());
-        console.log(self.properties().indexOf({'key':'name'}))
-        for (var key in self.properties()) {
-
-            console.log(self.properties()[key])
-        }
-*/
+        })    
     }
     
     this.initProperties();
@@ -116,6 +113,8 @@ var Task=function(data, parent){
 
     this.saveNewTask=function(key){
         data={}
+        data.finalizado=false;
+        //self.finalizado=ko.observable(false)
         data[key]=self[key]()
         $.post('/update',JSON.stringify(data),function(res){
             console.log('Added in mongo');
@@ -131,6 +130,7 @@ var Task=function(data, parent){
     }
     
     this.saveNewProperty=function(){
+        console.log("here")
         self[self.newkey()]=ko.observable(self.newvalue());
         self.properties.push( new Property(self.newkey(), ko.observable(self.newvalue())));
 
@@ -154,9 +154,33 @@ var Task=function(data, parent){
     }
 
 
+    this.ended=function(data){
+        self.saveProperty(data)
 
-        
+        return true
+    }
+
+    this.saveTask=function(task){
+        var data = ko.toJS(task)
+        delete data['Parent']
+        delete data['isNew']
+        //data={}
+        //data.finalizado=false;
+        //self.finalizado=ko.observable(false)
+        //data[key]=self[key]()
+        /*$.post('/update',JSON.stringify(data),function(res){
+            console.log('Added in mongo');
+            self._id=ko.observable(JSON.parse(res)['_id'])
+            self.data['_id']=JSON.parse(res)['_id']
+        })
+        self.Parent().tableRows.push(self);
+        self.Parent().tableRows.sort(compare)*/
+        console.log(data)
+        console.log(self)
+    }
 }
+
+
 
 var Project=function (data) {
     var self=this;
@@ -169,8 +193,8 @@ var ViewModel=function() {
     var self=this;
     this.tableRows=ko.observableArray();
     this.modalTask=ko.observable();
-    this.one=ko.observable()
-    
+    this.one=ko.observable();
+
     this.initData=function(){
 
     	this.initTasks();
@@ -213,30 +237,18 @@ var ViewModel=function() {
 
     this.newTask=function(){
         var task = new Task({}, self);
-        console.log((task))
         self.loadModal(task)
     }
 
     this.loadModal=function(task){
         $("#task").empty();
-        console.log(ko.toJS(task))
         self.modalTask(task);
         $('#myModal').modal("show");
         $("#myModal").draggable({
             handle: ".modal-header"
         });
     };
-    this.saveTask=function(task){
-        $("#task").empty();
-        $('#myModal').modal("show")
-        var properties = [];
-        for (var key in task) {
-            if (task.hasOwnProperty(key)) {
-                properties.push({ key: key, value: task[key] });
-            }
-        }
-        self.task(properties);
-    };
+   
 
     this.initData();
 }

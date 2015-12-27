@@ -2,7 +2,7 @@
 <html>
 <head>
 
-	<meta charset="utf-8">
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -15,8 +15,8 @@
 </head>
 <body>
     <h1  class="text-center">Peticiones de Cambio</h1></br>
-	<div class="container">
-		<div class="col-md-6 col-md-offset-3">
+    <div class="container">
+        <div class="col-md-6 col-md-offset-3">
             <div class="btn-group btn-group-justified" role="group" aria-label="...">
                 <a href="#" class="btn btn-default" role="button" data-bind='click: initTasks'>Peticiones</a>
                 <a href="#" class="btn btn-default" role="button" data-bind='click: initProjects' >Projectos</a>
@@ -42,7 +42,8 @@
                     </tr>
                 </thead>
                 <tbody data-bind="foreach: tableRows">
-                    <tr data-bind="click: $parent.loadModal">
+
+                    <tr data-bind="click: $parent.loadModal, style: { 'background-color': finalizado() ? 'red' : 'white' }">
                         <td>
                             <span data-bind="text: relevancia , click: $parent.loadModal"></span>
                         </td>
@@ -71,7 +72,7 @@
                     </tr>
                 </thead>
                 <tbody data-bind="foreach: tableRows">
-                    <tr data-bind="click: $parent.loadModal">
+                    <tr data-bind="click: $parent.loadModal, attr:{id:name'tr'}">
                         <td>
                             <span data-bind="text: name , click: $parent.loadModal"></span>
                         </td>
@@ -83,7 +84,7 @@
 
             </table>
             </script>
-		</div>
+        </div>
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog">
                 <div class="modal-content" data-bind="with: modalTask">
@@ -91,6 +92,9 @@
                         <h3 class="text-center"> Peticion de Cambio</h3>
                     </div>
                     <div class="modal-body" id="modalBody" >
+                        <div data-bind="template: { name: 'modalTemplate', ifnot : isNew }"></div>
+                        <div data-bind="template: { name: 'newTemplate', if: isNew }"></div>
+                        <script type="text/template" id="modalTemplate">
                             <table class="table" >
                                 <tbody id="task" data-bind="foreach: properties" class="sortable-ui">
                                     
@@ -98,6 +102,9 @@
                                         <td >  
                                             <label data-bind="text: key + ': ', attr:{id:key+'label'}"></label>
                                         </td>
+
+                                        <!-- ko if: key != 'finalizado' -->
+
                                         <td>
                                             <label  data-bind="text: value, visible:!editing()"></label>
                                             <input type="text" data-bind="value: value, visible:editing">
@@ -114,6 +121,13 @@
                                             <span class="glyphicon glyphicon-minus" aria-hidden="false"></span>
                                         </button>
                                         </td>
+                                        <!-- /ko -->
+                                        <!-- ko if: key == 'finalizado' -->
+                                            <td>
+                                                <input type="checkbox" data-bind="checked: value, click: $parent.ended">
+                                            </td>
+                                        <!-- /ko -->
+
                                     </tr>
                                     
                                 </tbody>
@@ -134,13 +148,58 @@
 
                                 </tbody>
                             </table>
+                        </script>
+                        <script type="text/template" id="newTemplate">
+                            <table class="table" >
+                                <tbody id="task" data-bind="foreach: properties" class="sortable-ui">
+                                    
+                                    <tr data-bind=" attr:{id:key}">
+                                        <td >  
+                                            <label data-bind="text: key + ': ', attr:{id:key+'label'}"></label>
+                                        </td>
+
+                                        <!-- ko if: key != 'finalizado' -->
+
+                                        <td>
+                                            <label  data-bind="text: value, visible:!editing()"></label>
+                                            <input type="text" data-bind="value: value, visible:editing">
+                                        </td>
+                                        
+                                        <!-- /ko -->
+                                        <!-- ko if: key == 'finalizado' -->
+                                            <td>
+                                                <input type="checkbox" data-bind="checked: value, click: $parent.ended">
+                                            </td>
+                                        <!-- /ko -->
+
+                                    </tr>
+                                    
+                                </tbody>
+                                <tbody>
+                                    <tr id='newProp' data-bind="visible: newVisible">
+                                        <td>
+                                            <input id='newKey' data-bind='value: newkey' type='text'>
+                                        </td>
+                                        <td>
+                                            <input id='newValue' data-bind='value: newvalue' type='text'>
+                                        </td> 
+                                        <td>
+                                            <button type='button' id='newButton' class='btn btn-default' data-bind='click:saveNewProperty'>
+                                                <span class='glyphicon glyphicon-save' aria-hidden='false'></span>
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            </script>
                         
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-bind="click:newProperty">
                               <span class="glyphicon glyphicon-plus" aria-hidden="false"></span>
                             </button>
 
-                            <button type="button" class="btn btn-default " date-bind="click:$root.task.loadModal">
+                            <button type="button" class="btn btn-default " data-bind="click:saveTask">
                               <span class="glyphicon glyphicon-save" aria-hidden="true" ></span>
                             </button>
                        </div>
@@ -149,7 +208,7 @@
             </div>
         </div>
     </div>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
   <script type="text/javascript" src="/js/helper.js"></script>
 
