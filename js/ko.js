@@ -18,7 +18,7 @@ var Task=function(data, parent){
     self.Parent = ko.observable(parent)
     this.properties=ko.observableArray()
 
-    //this.finalizado=ko.observable()
+    this.finalizado=ko.observable()
 
 
 
@@ -164,19 +164,26 @@ var Task=function(data, parent){
         var data = ko.toJS(task)
         delete data['Parent']
         delete data['isNew']
+        delete data['properties']
+        delete data['newVisible']
+        delete data['data']
+
+
         //data={}
         //data.finalizado=false;
         //self.finalizado=ko.observable(false)
         //data[key]=self[key]()
-        /*$.post('/update',JSON.stringify(data),function(res){
+        console.log(ko.toJSON(data))
+
+        $.post('/update',ko.toJSON(data),function(res){
             console.log('Added in mongo');
             self._id=ko.observable(JSON.parse(res)['_id'])
             self.data['_id']=JSON.parse(res)['_id']
         })
-        self.Parent().tableRows.push(self);
-        self.Parent().tableRows.sort(compare)*/
-        console.log(data)
         console.log(self)
+        self.Parent().tableRows.push(self);
+        self.Parent().tableRows.sort(compare)
+        //console.log(self)
     }
 }
 
@@ -226,9 +233,11 @@ var ViewModel=function() {
         var dta=JSON.parse(data);
         var a =[];
         for(var i in dta){
+            if ('relevancia' in dta[i]){
             var t =  new Project(dta[i], self);
             console.log(t)
             self.tableRows.push(t);
+        }
             
         }
         self.tableRows.sort(compare);
